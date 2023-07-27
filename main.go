@@ -46,7 +46,7 @@ func main() {
 	// Start the server
 	log.Println("Server started on port 8080")
 
-	mux := http.NewServeMux()
+	mux := http.DefaultServeMux
 
 	loggedMux := loggingMiddleware(mux)
 

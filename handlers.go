@@ -42,6 +42,15 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if user.Username == "" || user.Password == "" {
+		util.JSONResponse(w, http.StatusBadRequest, &models.Response{
+			Status:  "error",
+			Message: "Username and password are required.",
+			Data:    nil,
+		})
+		return
+	}
+
 	userRecord, err := data.GetUserByUsername(db, user.Username)
 	if err != nil {
 		if err == sql.ErrNoRows {

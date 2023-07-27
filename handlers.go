@@ -59,6 +59,7 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 				Message: "Invalid credentials.",
 				Data:    nil,
 			})
+			return
 		} else {
 			util.JSONResponse(w, http.StatusInternalServerError, &models.Response{
 				Status:  "error",

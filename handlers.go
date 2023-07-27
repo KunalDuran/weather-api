@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"strconv"
 	"time"
@@ -19,6 +18,16 @@ import (
 )
 
 func loginHandler(w http.ResponseWriter, r *http.Request) {
+
+	if r.Method != http.MethodPost {
+		util.JSONResponse(w, http.StatusMethodNotAllowed, &models.Response{
+			Status:  "error",
+			Message: "Method not allowed.",
+			Data:    nil,
+		})
+		return
+	}
+
 	var user struct {
 		Username string `json:"username"`
 		Password string `json:"password"`
@@ -180,20 +189,20 @@ func weatherHandler(w http.ResponseWriter, r *http.Request) {
 
 	resp, err := util.WebRequest("GET", url, nil)
 	if err != nil {
-		log.Fatal(err)
+		log.Error(err)
 	}
 
 	defer resp.Body.Close()
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		log.Fatal(err)
+		log.Error(err)
 	}
 
 	if resp.StatusCode != http.StatusOK {
 		var errorResp models.StandardResponse
 		err = json.Unmarshal(body, &errorResp)
 		if err != nil {
-			log.Fatal(err)
+			log.Error(err)
 		}
 
 		util.JSONResponse(w, http.StatusOK, &models.Response{
@@ -207,7 +216,7 @@ func weatherHandler(w http.ResponseWriter, r *http.Request) {
 	var weatherResponse models.WeatherResponse
 	err = json.Unmarshal(body, &weatherResponse)
 	if err != nil {
-		log.Fatal(err)
+		log.Error(err)
 	}
 
 	util.JSONResponse(w, http.StatusOK, &models.Response{
@@ -220,12 +229,12 @@ func weatherHandler(w http.ResponseWriter, r *http.Request) {
 
 	userID, err := util.GetUserIDFromToken(r.Header.Get("Authorization"))
 	if err != nil {
-		log.Fatal(err)
+		log.Error(err)
 	}
 
 	err = data.InsertWeatherHistory(db, weatherResponse, userID)
 	if err != nil {
-		log.Fatal(err)
+		log.Error(err)
 	}
 }
 

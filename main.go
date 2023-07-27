@@ -2,23 +2,16 @@ package main
 
 import (
 	"database/sql"
-	"log"
 	"net/http"
 	"os"
 
 	"github.com/KunalDuran/weather-api/data"
-	"github.com/KunalDuran/weather-api/util"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/joho/godotenv"
 )
 
 var db *sql.DB
 var API_KEY string
-
-type App struct {
-	Logger *log.Logger
-	DB     *sql.DB
-}
 
 func main() {
 
@@ -38,19 +31,24 @@ func main() {
 	// Connect the database
 	db, err = data.InitDB(dbHost, dbPort, dbUser, dbPass)
 	if err != nil {
-		log.Panic(err)
+		log.Warn(err)
 	}
 
 	// Define API routes
 	http.HandleFunc("/api/login", loginHandler)
 	http.HandleFunc("/api/register", registerHandler)
-	http.HandleFunc("/api/weather", util.AuthMiddleware(weatherHandler))
-	http.HandleFunc("/api/history", util.AuthMiddleware(getWeatherHistoryHandler))
-	http.HandleFunc("/api/history/update", util.AuthMiddleware(updateWeatherHistoryHandler))
-	http.HandleFunc("/api/history/delete", util.AuthMiddleware(deleteWeatherHistoryHandler))
-	http.HandleFunc("/api/history/bulkdelete", util.AuthMiddleware(bulkDeleteWeatherHistoryHandler))
+	http.HandleFunc("/api/weather", AuthMiddleware(weatherHandler))
+	http.HandleFunc("/api/history", AuthMiddleware(getWeatherHistoryHandler))
+	http.HandleFunc("/api/history/update", AuthMiddleware(updateWeatherHistoryHandler))
+	http.HandleFunc("/api/history/delete", AuthMiddleware(deleteWeatherHistoryHandler))
+	http.HandleFunc("/api/history/bulkdelete", AuthMiddleware(bulkDeleteWeatherHistoryHandler))
 
 	// Start the server
 	log.Println("Server started on port 8080")
-	log.Fatal(http.ListenAndServe(":8080", util.CorsMiddleware(http.DefaultServeMux)))
+
+	mux := http.NewServeMux()
+
+	loggedMux := loggingMiddleware(mux)
+
+	log.Fatal(http.ListenAndServe(":8080", CorsMiddleware(loggedMux)))
 }

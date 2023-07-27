@@ -109,6 +109,7 @@ func registerHandler(w http.ResponseWriter, r *http.Request) {
 			Message: "Method not allowed.",
 			Data:    nil,
 		})
+		return
 	}
 
 	var user struct {
@@ -154,33 +155,53 @@ func registerHandler(w http.ResponseWriter, r *http.Request) {
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
 	if err != nil {
-		fmt.Println(err)
-		w.WriteHeader(http.StatusInternalServerError)
+		util.JSONResponse(w, http.StatusInternalServerError, &models.Response{
+			Status:  "error",
+			Message: "Internal server error.",
+			Data:    nil,
+		})
 		return
 	}
 
 	parseBirthDate, err := time.Parse("2006-01-02", user.BirthDate)
 	if err != nil {
-		fmt.Println(err)
-		w.WriteHeader(http.StatusInternalServerError)
+		util.JSONResponse(w, http.StatusBadRequest, &models.Response{
+			Status:  "error",
+			Message: "Invalid birth date.",
+			Data:    nil,
+		})
 		return
 	}
 
 	id, err := data.CreateUser(db, user.Username, string(hashedPassword), parseBirthDate)
 	if err != nil {
-		fmt.Println(err)
-		w.WriteHeader(http.StatusInternalServerError)
+		util.JSONResponse(w, http.StatusInternalServerError, &models.Response{
+			Status:  "error",
+			Message: "Internal server error.",
+			Data:    nil,
+		})
 		return
 	}
 
 	token, err := util.CreateToken(id, user.Username)
 	if err != nil {
-		fmt.Println(err)
-		w.WriteHeader(http.StatusInternalServerError)
+		util.JSONResponse(w, http.StatusInternalServerError, &models.Response{
+			Status:  "error",
+			Message: "Failed to create token.",
+			Data:    nil,
+		})
 		return
 	}
 
 	w.Header().Set("Authorization", "Bearer "+token)
+	resp := &models.Response{
+		Status:  "success",
+		Message: "Registered successfully.",
+		Data:    map[string]string{"token": token},
+	}
+
+	util.JSONResponse(w, http.StatusOK, resp)
+
 }
 
 func weatherHandler(w http.ResponseWriter, r *http.Request) {

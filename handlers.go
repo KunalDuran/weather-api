@@ -51,6 +51,15 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if !util.ValidateEmail(user.Username) {
+		util.JSONResponse(w, http.StatusBadRequest, &models.Response{
+			Status:  "error",
+			Message: "Invalid username, please provide a valid email address.",
+			Data:    nil,
+		})
+		return
+	}
+
 	userRecord, err := data.GetUserByUsername(db, user.Username)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -70,7 +79,6 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	// Compare the password with the hashed password in the database.
 	if err := bcrypt.CompareHashAndPassword([]byte(userRecord.Password), []byte(user.Password)); err != nil {
 		util.JSONResponse(w, http.StatusUnauthorized, &models.Response{
 			Status:  "error",
@@ -131,6 +139,33 @@ func registerHandler(w http.ResponseWriter, r *http.Request) {
 		util.JSONResponse(w, http.StatusBadRequest, &models.Response{
 			Status:  "error",
 			Message: "Username, password and birth date are required.",
+			Data:    nil,
+		})
+		return
+	}
+
+	if !util.ValidateEmail(user.Username) {
+		util.JSONResponse(w, http.StatusBadRequest, &models.Response{
+			Status:  "error",
+			Message: "Invalid email address.",
+			Data:    nil,
+		})
+		return
+	}
+
+	if !util.ValidatePassword(user.Password) {
+		util.JSONResponse(w, http.StatusBadRequest, &models.Response{
+			Status:  "error",
+			Message: "Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, and one digit.",
+			Data:    nil,
+		})
+		return
+	}
+
+	if !util.ValidateDateOfBirth(user.BirthDate) {
+		util.JSONResponse(w, http.StatusBadRequest, &models.Response{
+			Status:  "error",
+			Message: "Invalid birth date.",
 			Data:    nil,
 		})
 		return
@@ -256,8 +291,6 @@ func weatherHandler(w http.ResponseWriter, r *http.Request) {
 		Data:    weatherResponse,
 	})
 
-	// Store the weather search history in the 'weather_history' table in the database.
-
 	userID, err := util.GetUserIDFromToken(r.Header.Get("Authorization"))
 	if err != nil {
 		log.Error(err)
@@ -308,7 +341,6 @@ func updateWeatherHistoryHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Get the weather ID from the request.
 	weatherID := r.URL.Query().Get("weatherID")
 	weatherIDInt, err := strconv.Atoi(weatherID)
 	if err != nil {
@@ -320,7 +352,6 @@ func updateWeatherHistoryHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Get the weather record from the database.
 	weather, err := data.GetWeatherByID(db, weatherIDInt)
 	if err != nil {
 		util.JSONResponse(w, http.StatusInternalServerError, &models.Response{
@@ -331,7 +362,6 @@ func updateWeatherHistoryHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Update the weather record.
 	weather.Name = "New York"
 	weather.Main.Temp = 300
 	weather.Main.FeelsLike = 300
@@ -370,7 +400,6 @@ func updateWeatherHistoryHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func deleteWeatherHistoryHandler(w http.ResponseWriter, r *http.Request) {
-	// Get the weather ID from the request.
 	weatherID := r.URL.Query().Get("weatherID")
 
 	weatherIDInt, err := strconv.Atoi(weatherID)
@@ -402,7 +431,6 @@ func deleteWeatherHistoryHandler(w http.ResponseWriter, r *http.Request) {
 
 func bulkDeleteWeatherHistoryHandler(w http.ResponseWriter, r *http.Request) {
 
-	// Get the weather IDs from the request body.
 	weatherIDs := []int{}
 	err := json.NewDecoder(r.Body).Decode(&weatherIDs)
 	if err != nil {
@@ -411,7 +439,6 @@ func bulkDeleteWeatherHistoryHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	userID, _ := util.GetUserIDFromToken(r.Header.Get("Authorization"))
-	// Delete the weathers from the database.
 	affectedRows, err := data.BulkDeleteWeathers(db, userID)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -432,7 +459,6 @@ func bulkDeleteWeatherHistoryHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		util.JSONResponse(w, http.StatusOK, resp)
 	} else {
-		// No rows were affected, return an empty response.
 		resp := &models.Response{
 			Status:  "info",
 			Message: "No history to delete.",

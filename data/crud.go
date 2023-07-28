@@ -8,8 +8,6 @@ import (
 	"github.com/KunalDuran/weather-api/util"
 )
 
-// InsertWeatherHistory function is used to insert a new weather search history record
-// in the 'weather_history' table in the database.
 func InsertWeatherHistory(db *sql.DB, weather models.WeatherResponse, userID string) error {
 
 	stmt := "INSERT INTO weather_history (city_name, user_id, coord_lon, coord_lat, weather_id, weather_main, weather_description, weather_icon, base, temp, feels_like, temp_min, temp_max, pressure, humidity, visibility, wind_speed, wind_deg, clouds_all, dt, sys_type, sys_id, sys_country, sys_sunrise, sys_sunset, timezone) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"

@@ -3,6 +3,8 @@ package main
 import (
 	"net/http"
 
+	"github.com/KunalDuran/weather-api/models"
+	"github.com/KunalDuran/weather-api/util"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/sirupsen/logrus"
 )
@@ -23,7 +25,11 @@ func AuthMiddleware(next http.HandlerFunc) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		token := r.Header.Get("Authorization")
 		if token == "" {
-			w.WriteHeader(http.StatusUnauthorized)
+			util.JSONResponse(w, http.StatusUnauthorized, &models.Response{
+				Status:  "error",
+				Message: "No token provided",
+				Data:    nil,
+			})
 			return
 		}
 
@@ -32,14 +38,22 @@ func AuthMiddleware(next http.HandlerFunc) http.HandlerFunc {
 		})
 
 		if err != nil {
-			w.WriteHeader(http.StatusUnauthorized)
+			util.JSONResponse(w, http.StatusUnauthorized, &models.Response{
+				Status:  "error",
+				Message: "Invalid token",
+				Data:    nil,
+			})
 			return
 		}
 
 		id := claims.Claims.(jwt.MapClaims)["Subject"].(string)
 
 		if id == "" {
-			w.WriteHeader(http.StatusUnauthorized)
+			util.JSONResponse(w, http.StatusUnauthorized, &models.Response{
+				Status:  "error",
+				Message: "Invalid token",
+				Data:    nil,
+			})
 			return
 		}
 

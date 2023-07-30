@@ -434,13 +434,6 @@ func deleteWeatherHistoryHandler(w http.ResponseWriter, r *http.Request) {
 
 func bulkDeleteWeatherHistoryHandler(w http.ResponseWriter, r *http.Request) {
 
-	weatherIDs := []int{}
-	err := json.NewDecoder(r.Body).Decode(&weatherIDs)
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
 	userID, _ := util.GetUserIDFromToken(r.Header.Get("Authorization"))
 	affectedRows, err := data.BulkDeleteWeathers(db, userID)
 	if err != nil {

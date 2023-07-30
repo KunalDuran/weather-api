@@ -37,7 +37,6 @@ func main() {
 	http.HandleFunc("/api/register", registerHandler)
 	http.HandleFunc("/api/weather", AuthMiddleware(weatherHandler))
 	http.HandleFunc("/api/history", AuthMiddleware(getWeatherHistoryHandler))
-	http.HandleFunc("/api/history/update", AuthMiddleware(updateWeatherHistoryHandler))
 	http.HandleFunc("/api/history/delete", AuthMiddleware(deleteWeatherHistoryHandler))
 	http.HandleFunc("/api/history/bulkdelete", AuthMiddleware(bulkDeleteWeatherHistoryHandler))
 

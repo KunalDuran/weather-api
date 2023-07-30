@@ -334,6 +334,16 @@ func getWeatherHistoryHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func deleteWeatherHistoryHandler(w http.ResponseWriter, r *http.Request) {
+
+	if r.Method != http.MethodDelete {
+		util.JSONResponse(w, http.StatusMethodNotAllowed, &models.Response{
+			Status:  "error",
+			Message: "Method not allowed.",
+			Data:    nil,
+		})
+		return
+	}
+
 	weatherID := r.URL.Query().Get("weatherID")
 
 	weatherIDInt, err := strconv.Atoi(weatherID)
@@ -346,11 +356,20 @@ func deleteWeatherHistoryHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = data.DeleteWeather(db, weatherIDInt)
+	affectedRows, err := data.DeleteWeather(db, weatherIDInt)
 	if err != nil {
 		util.JSONResponse(w, http.StatusInternalServerError, &models.Response{
 			Status:  "error",
 			Message: "Failed to delete weather.",
+			Data:    nil,
+		})
+		return
+	}
+
+	if affectedRows == 0 {
+		util.JSONResponse(w, http.StatusNotFound, &models.Response{
+			Status:  "error",
+			Message: "Weather not found with this ID.",
 			Data:    nil,
 		})
 		return
@@ -364,6 +383,15 @@ func deleteWeatherHistoryHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func bulkDeleteWeatherHistoryHandler(w http.ResponseWriter, r *http.Request) {
+
+	if r.Method != http.MethodDelete {
+		util.JSONResponse(w, http.StatusMethodNotAllowed, &models.Response{
+			Status:  "error",
+			Message: "Method not allowed.",
+			Data:    nil,
+		})
+		return
+	}
 
 	userID, _ := util.GetUserIDFromToken(r.Header.Get("Authorization"))
 	affectedRows, err := data.BulkDeleteWeathers(db, userID)

@@ -52,16 +52,20 @@ func InsertWeatherHistory(db *sql.DB, weather models.WeatherResponse, userID str
 	return int(insertedID), nil
 }
 
-func DeleteWeather(db *sql.DB, id int) error {
+func DeleteWeather(db *sql.DB, id int) (int, error) {
 
 	stmt := "DELETE FROM weather_history WHERE id = ?"
 
-	_, err := db.Exec(stmt, id)
+	result, err := db.Exec(stmt, id)
 	if err != nil {
-		return err
+		return 0, err
 	}
 
-	return nil
+	affectedRows, err := result.RowsAffected()
+	if err != nil {
+		return 0, err
+	}
+	return int(affectedRows), nil
 }
 
 func UpdateWeatherIfExists(db *sql.DB, weather models.WeatherResponse, userID int) error {

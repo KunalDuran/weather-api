@@ -2,6 +2,7 @@ package main
 
 import (
 	"database/sql"
+	"fmt"
 	"net/http"
 	"os"
 
@@ -31,6 +32,8 @@ func main() {
 	db, err = data.InitDB(dbHost, dbPort, dbUser, dbPass, dbName)
 	if err != nil {
 		log.Warn(err)
+		fmt.Println("Error connecting to database")
+		return
 	}
 
 	http.HandleFunc("/api/login", loginHandler)

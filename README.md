@@ -40,7 +40,6 @@ The Weather API provides the following endpoints:
 6. **DELETE /api/history/bulkdelete**
 
    - Description: Delete multiple weather search history records for the logged-in user.
-   - Body: JSON array of `weatherID`s to delete.
    - Returns: A success message if the deletions were successful.
 
 ## Setup Instructions

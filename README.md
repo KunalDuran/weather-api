@@ -70,9 +70,9 @@ To run the Weather API on your machine, follow these instructions:
 5. Create a `.env` file in the project root directory with the following variables:
 
    ```plaintext
-   DB_USER=xxxx
-   DB_PASS=xxxx
-   DB_HOST=xxxx
+   DB_USER=mysql_database_user
+   DB_PASS=mysql_database_password
+   DB_HOST=mysql_database_host
    DB_PORT=mysql_database_port
    DB_NAME=weather
    API_KEY=your_openweathermap_API_key
@@ -101,6 +101,7 @@ The Weather API uses JWT (JSON Web Tokens) for authentication. When a user logs 
 ## Database
 
 This API uses MySQL as the Database.
+Creation of Database and Tables is done automatically by the API.
 
 ## Conclusion
 

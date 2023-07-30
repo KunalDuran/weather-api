@@ -80,13 +80,10 @@ func ParseTimestamp(timestamp string) (time.Time, error) {
 }
 
 func ValidateEmail(email string) bool {
-	// Regular expression for email validation
-	emailRegex := `^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`
-	matched, err := regexp.MatchString(emailRegex, email)
-	if err != nil {
-		return false
-	}
-	return matched
+	// Regular expression to match a valid email address.
+	re := regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
+
+	return re.MatchString(email)
 }
 
 func ValidatePassword(password string) bool {

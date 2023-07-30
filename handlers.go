@@ -403,10 +403,10 @@ func deleteWeatherHistoryHandler(w http.ResponseWriter, r *http.Request) {
 	weatherID := r.URL.Query().Get("weatherID")
 
 	weatherIDInt, err := strconv.Atoi(weatherID)
-	if err != nil {
+	if err != nil || weatherIDInt <= 0 || weatherID == "" {
 		util.JSONResponse(w, http.StatusBadRequest, &models.Response{
 			Status:  "error",
-			Message: "Invalid weather ID.",
+			Message: "Invalid weatherID.",
 			Data:    nil,
 		})
 		return

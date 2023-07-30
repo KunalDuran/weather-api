@@ -8,11 +8,11 @@ import (
 	"github.com/KunalDuran/weather-api/util"
 )
 
-func InsertWeatherHistory(db *sql.DB, weather models.WeatherResponse, userID string) error {
-
+func InsertWeatherHistory(db *sql.DB, weather models.WeatherResponse, userID string) (int, error) {
+	var insertedID int64
 	stmt := "INSERT INTO weather_history (city_name, user_id, coord_lon, coord_lat, weather_id, weather_main, weather_description, weather_icon, base, temp, feels_like, temp_min, temp_max, pressure, humidity, visibility, wind_speed, wind_deg, clouds_all, dt, sys_type, sys_id, sys_country, sys_sunrise, sys_sunset, timezone) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
 
-	_, err := db.Exec(stmt,
+	result, err := db.Exec(stmt,
 		weather.Name,
 		userID,
 		weather.Coord.Lon,
@@ -41,10 +41,15 @@ func InsertWeatherHistory(db *sql.DB, weather models.WeatherResponse, userID str
 		weather.Timezone,
 	)
 	if err != nil {
-		return err
+		return 0, err
 	}
 
-	return nil
+	insertedID, err = result.LastInsertId()
+	if err != nil {
+		return 0, err
+	}
+
+	return int(insertedID), nil
 }
 
 func DeleteWeather(db *sql.DB, id int) error {

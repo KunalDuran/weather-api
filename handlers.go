@@ -285,21 +285,24 @@ func weatherHandler(w http.ResponseWriter, r *http.Request) {
 		log.Error(err)
 	}
 
+	userID, err := util.GetUserIDFromToken(r.Header.Get("Authorization"))
+	if err != nil {
+		log.Error(err)
+	}
+
+	insertedRowID, err := data.InsertWeatherHistory(db, weatherResponse, userID)
+	if err != nil {
+		log.Error(err)
+	}
+
+	weatherResponse.WeatherID = insertedRowID
+
 	util.JSONResponse(w, http.StatusOK, &models.Response{
 		Status:  "success",
 		Message: "Weather fetched successfully",
 		Data:    weatherResponse,
 	})
 
-	userID, err := util.GetUserIDFromToken(r.Header.Get("Authorization"))
-	if err != nil {
-		log.Error(err)
-	}
-
-	err = data.InsertWeatherHistory(db, weatherResponse, userID)
-	if err != nil {
-		log.Error(err)
-	}
 }
 
 func getWeatherHistoryHandler(w http.ResponseWriter, r *http.Request) {

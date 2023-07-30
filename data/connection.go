@@ -39,13 +39,13 @@ func InitDB(host, port, user, password, dbName string) (Db *sql.DB, err error) {
 }
 
 func databaseExists(db *sql.DB, dbName string) bool {
-	var exists bool
+	var exists string
 	query := "SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = ?"
 	err := db.QueryRow(query, dbName).Scan(&exists)
 	if err != nil && err != sql.ErrNoRows {
 		panic(err)
 	}
-	return exists
+	return exists == dbName
 }
 
 func createDatabase(db *sql.DB, dbName string) error {

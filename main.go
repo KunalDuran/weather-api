@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/KunalDuran/weather-api/data"
 	_ "github.com/go-sql-driver/mysql"
@@ -35,6 +36,17 @@ func main() {
 		fmt.Println("Error connecting to database")
 		return
 	}
+
+	// to keep the connection alive
+	go func() {
+		for {
+			time.Sleep(time.Second * 15)
+			err := db.Ping()
+			if err != nil {
+				log.Println(err)
+			}
+		}
+	}()
 
 	http.HandleFunc("/api/login", loginHandler)
 	http.HandleFunc("/api/register", registerHandler)
